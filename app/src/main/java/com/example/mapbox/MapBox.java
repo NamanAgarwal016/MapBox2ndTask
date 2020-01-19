@@ -3,6 +3,7 @@ package com.example.mapbox;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.PointF;
 import android.os.Bundle;
@@ -38,6 +39,7 @@ import com.mapbox.mapboxsdk.style.sources.VectorSource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
@@ -53,6 +55,9 @@ public class MapBox extends AppCompatActivity implements
     private static final String SOURCE_ID = "SOURCE_ID";
     private static final String ICON_ID = "ICON_ID";
     private static final String LAYER_ID = "LAYER_ID";
+
+    private SymbolManager symbolManager;
+    private Symbol symbol;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,17 +76,19 @@ public class MapBox extends AppCompatActivity implements
 
     @Override
     public void onMapReady(@NonNull final MapboxMap mapboxMap) {
-        
+
         this.mapboxMap = mapboxMap;
+
+
         List<Feature> symbolLayerIconFeatureList = new ArrayList<>();
 
-        //To change the loaction of coins.
-        symbolLayerIconFeatureList.add(Feature.fromGeometry(
-                Point.fromLngLat(75.585002, 28.362230)));
-        symbolLayerIconFeatureList.add(Feature.fromGeometry(
-                Point.fromLngLat(75.585614, 28.362334)));
-        symbolLayerIconFeatureList.add(Feature.fromGeometry(
-                Point.fromLngLat(75.585753, 28.361645)));
+        /* wwithout click listener*/
+//       symbolLayerIconFeatureList.add(Feature.fromGeometry(
+//               Point.fromLngLat(75.585002, 28.362230)));
+//        symbolLayerIconFeatureList.add(Feature.fromGeometry(
+//                Point.fromLngLat(75.585614, 28.362334)));
+//        symbolLayerIconFeatureList.add(Feature.fromGeometry(
+//                Point.fromLngLat(75.585753, 28.361645)));
 
         //To set the theme of mapbox Dark.
         //mapboxMap.setStyle(Style.DARK);
@@ -111,6 +118,38 @@ public class MapBox extends AppCompatActivity implements
             public void onStyleLoaded(@NonNull Style style) {
                 enableLocationComponent(style);
 
+                // Set up a SymbolManager instance
+                symbolManager = new SymbolManager(mapView, mapboxMap, style);
+
+                symbolManager.setIconAllowOverlap(true);
+                symbolManager.setTextAllowOverlap(true);
+
+// Add symbol at specified lat/lon
+                symbol = symbolManager.create(new SymbolOptions()
+                        .withLatLng(new LatLng(28.362230, 75.585002))
+                        .withIconImage(ICON_ID)
+                        .withIconSize(0.5f)
+                        .withDraggable(false));
+                symbol = symbolManager.create(new SymbolOptions()
+                        .withLatLng(new LatLng(28.362334, 75.585614))
+                        .withIconImage(ICON_ID)
+                        .withIconSize(0.5f)
+                        .withDraggable(false));
+                symbol = symbolManager.create(new SymbolOptions()
+                        .withLatLng(new LatLng(28.361645, 75.585753))
+                        .withIconImage(ICON_ID)
+                        .withIconSize(0.5f)
+                        .withDraggable(false));
+
+
+                // Add click listener and change the symbol to a cafe icon on click
+                symbolManager.addClickListener(new OnSymbolClickListener() {
+                    @Override
+                    public void onAnnotationClick(Symbol symbol) {
+                        Intent i = new Intent(MapBox.this,Vuforia.class);
+                        startActivity(i);
+                    }
+                });
 
             }
         });
